@@ -92,13 +92,14 @@ async function verifyStaff(){
  if(pe||!p||!['pastor','admin','editor'].includes(p.role)){
   await db.auth.signOut();showLogin();notice('loginStatus','This account is not authorised for the church staff dashboard.',true);return false;
  }
- user=u;profile=p;showDashboard();await loadRows();return true;
+ user=u;profile=p;showDashboard();$('submissionList').innerHTML='<div class="empty">Loading submissions…</div>';loadRows().catch(err=>{$('submissionList').innerHTML='<div class="empty">Could not load submissions: '+esc(err.message||'Please refresh.')+'</div>';});return true;
 }
 $('loginForm').addEventListener('submit',async e=>{
  e.preventDefault();const b=$('loginBtn');b.disabled=true;b.textContent='Signing in…';
- const {error}=await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});
- if(error)notice('loginStatus',error.message,true);else {notice('loginStatus','Signed in. Checking staff permissions…');await verifyStaff();}
- b.disabled=false;b.textContent='Sign in securely';
+ try{const {error}=await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});
+ if(error)notice('loginStatus',error.message,true);else {notice('loginStatus','Signed in. Checking staff permissions…');await verifyStaff();}}
+ catch(err){notice('loginStatus','Sign-in is taking longer than expected. Check your connection and try again.',true);}
+ finally{b.disabled=false;b.textContent='Sign in securely';}
 });
 $('signOut').addEventListener('click',async()=>{await db.auth.signOut();user=null;profile=null;showLogin();notice('loginStatus','You have signed out.');});
 $('pastorPhotoFile').addEventListener('change',()=>{
