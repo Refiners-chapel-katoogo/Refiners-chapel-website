@@ -31,10 +31,9 @@ button.secondary{background:#e9eef4;color:var(--navy)}button.danger{background:#
 <section class="panel" id="loginPanel">
 <h1>Church Media Dashboard</h1>
 <p>Upload church photos, videos and documents, and publish announcements directly from your phone.</p>
-<label for="email">Staff email</label><input id="email" type="email" autocomplete="username" placeholder="Enter your approved email">
-<label for="password">Password</label><input id="password" type="password" autocomplete="current-password" placeholder="Enter your password">
+<label for="churchPin">Shared church PIN</label><input id="churchPin" type="password" inputmode="numeric" pattern="[0-9]*" minlength="8" maxlength="64" autocomplete="current-password" placeholder="Enter the church PIN" aria-label="Shared church PIN">
 <button id="loginBtn">Sign in to dashboard</button>
-<div id="loginMsg" class="status" role="status">Access is limited to approved pastor, administrator and media-team accounts. There is no public sign-up.</div>
+<div id="loginMsg" class="status" role="status">Enter the private PIN shared by the church leadership. Do not share it publicly. Sign-in attempts are protected by Supabase Auth.</div>
 </section>
 <section id="dashboard" class="hidden">
 <div class="panel">
@@ -78,7 +77,7 @@ async function enterSession(session){
   await db.auth.signOut();$('loginMsg').textContent='This account is not approved for dashboard access. Ask the pastor to approve your staff account.';return;
  }
  currentRole=profile.role;$('loginPanel').classList.add('hidden');$('dashboard').classList.remove('hidden');
- $('who').textContent=(profile.full_name||session.user.email)+' · '+currentRole;
+ $('who').textContent=(profile.full_name||'Shared Church Media Team')+' · '+currentRole;
  await refreshAll();
 }
 async function refreshAll(){await loadAnnouncements();await loadMedia();}
@@ -99,9 +98,11 @@ async function loadMedia(){
  document.querySelectorAll('[data-delete-media]').forEach(b=>b.addEventListener('click',async()=>{if(!confirm('Permanently delete this media file?'))return;const {error:storageError}=await db.storage.from('church-media').remove([b.dataset.path]);if(storageError){alert(storageError.message);return;}const {error}=await db.from('media_assets').delete().eq('id',b.dataset.deleteMedia);if(error)alert('File removed, but its media record could not be deleted: '+error.message);await loadMedia();}));
 }
 $('loginBtn').addEventListener('click',async()=>{
- $('loginMsg').textContent='Signing in...';
- const {data,error}=await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});
- if(error){$('loginMsg').textContent='Sign-in failed: '+error.message;return;}
+ $('loginMsg').textContent='Checking church PIN...';
+ const pin=$('churchPin').value.trim();
+ if(!/^\\d{8,64}$/.test(pin)){$('loginMsg').textContent='Enter the 8-digit-or-longer church PIN.';return;}
+ const {data,error}=await db.auth.signInWithPassword({email:'media-team@oicliipexupbgjmongpx.supabase.co',password:pin});
+ if(error){$('loginMsg').textContent='The PIN was not accepted. Check it with the church administrator and try again.';return;}
  await enterSession(data.session);
 });
 $('logoutBtn').addEventListener('click',async()=>{await db.auth.signOut();location.reload();});
