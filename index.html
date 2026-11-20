@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Refiners Chapel Katoogo — Making Christ Known, Transforming Lives, Aligning Destinies.">
+  <title>Refiners Chapel Katoogo</title>
+  <style>
+    :root { --navy:#101d36; --red:#a92732; --gold:#d5a642; --cream:#f7f4ed; --ink:#202735; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; font-family:Arial,Helvetica,sans-serif; color:var(--ink); line-height:1.65; }
+    header { background:var(--navy); color:white; padding:14px 6%; display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+    .brand { display:flex; align-items:center; gap:12px; font-weight:700; font-size:1.05rem; }
+    .brand img { width:54px; height:54px; object-fit:contain; background:white; border-radius:50%; padding:3px; }
+    nav { display:flex; gap:20px; flex-wrap:wrap; }
+    nav a { color:white; text-decoration:none; font-weight:600; font-size:.94rem; }
+    nav a:hover { color:var(--gold); }
+    .hero { background:linear-gradient(120deg,rgba(16,29,54,.96),rgba(16,29,54,.78)),url('assets/mission-vision-constitution.jpg') center/cover; color:white; padding:100px 7%; text-align:center; }
+    .hero .eyebrow { color:var(--gold); text-transform:uppercase; letter-spacing:3px; font-weight:bold; }
+    h1 { font-size:clamp(2.3rem,6vw,4.4rem); line-height:1.12; margin:12px auto 18px; max-width:900px; }
+    .hero p { max-width:720px; margin:0 auto 28px; font-size:1.15rem; }
+    .button { display:inline-block; background:var(--red); color:white; text-decoration:none; padding:12px 24px; border-radius:4px; font-weight:bold; }
+    section { padding:70px 7%; }
+    .section-title { text-align:center; color:var(--navy); font-size:2rem; margin:0 0 12px; }
+    .intro { max-width:780px; margin:0 auto 34px; text-align:center; }
+    .cream { background:var(--cream); }
+    .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:22px; max-width:1100px; margin:32px auto 0; }
+    .card { background:white; border-top:4px solid var(--gold); padding:26px; border-radius:6px; box-shadow:0 5px 20px rgba(0,0,0,.06); }
+    .card h3 { color:var(--red); margin-top:0; }
+    .values { text-align:center; background:var(--navy); color:white; }
+    .values .section-title { color:white; }
+    .value-list { display:flex; justify-content:center; flex-wrap:wrap; gap:16px; margin-top:28px; }
+    .value-list span { border:1px solid var(--gold); color:var(--gold); padding:12px 24px; border-radius:30px; font-weight:bold; }
+    .contact { text-align:center; }
+    footer { background:#0b1426; color:#dce2ec; text-align:center; padding:25px 6%; font-size:.9rem; }
+    @media(max-width:600px) { header { justify-content:center; } nav { justify-content:center; gap:14px; } .hero { padding:76px 6%; } section { padding:55px 6%; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <img src="assets/refiners-chapel-logo.jpg" alt="Refiners Chapel logo">
+      <span>REFINERS CHAPEL KATOOGO</span>
+    </div>
+    <nav aria-label="Main navigation">
+      <a href="#about">About</a><a href="#vision">Vision &amp; Mission</a><a href="#values">Core Principles</a><a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="eyebrow">Welcome to Refiners Chapel Katoogo</div>
+      <h1>Making Christ Known</h1>
+      <p>Transforming Lives. Aligning Destinies. A ministry committed to refining lives through the Word of God and prayer.</p>
+      <a class="button" href="#vision">Discover Our Vision</a>
+    </section>
+
+    <section id="about">
+      <h2 class="section-title">About Us</h2>
+      <p class="intro">Refiners Chapel Katoogo exists to proclaim the Gospel of Jesus Christ, nurture believers, and help people grow into the purpose God has for their lives.</p>
+    </section>
+
+    <section class="cream" id="vision">
+      <h2 class="section-title">Our Vision &amp; Mission</h2>
+      <div class="cards">
+        <article class="card">
+          <h3>Our Vision</h3>
+          <h2>Make Christ Known</h2>
+          <p>Boldly proclaim the Gospel of Jesus Christ and shine the light of His truth in our community and beyond, that all may know Him as Lord and Savior.</p>
+          <p><strong>Scripture:</strong> 2 Corinthians 4:5</p>
+        </article>
+        <article class="card">
+          <h3>Our Mission</h3>
+          <h2>Transform Lives, Align Destinies</h2>
+          <p>Refine lives through the Word of God and prayer, nurture believers as vessels of honor, and help them be transformed by Christ and aligned to their God-given purpose.</p>
+          <p><strong>Scriptures:</strong> Malachi 3:3; Jeremiah 1:5</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="about-more">
+      <h2 class="section-title">What We Are Committed To</h2>
+      <p class="intro">We encourage righteous living and seek to restore and build communities grounded in holiness and truth.</p>
+    </section>
+
+    <section class="values" id="values">
+      <h2 class="section-title">Our Core Principles</h2>
+      <p class="intro">The values that guide our service and fellowship.</p>
+      <div class="value-list"><span>Faith</span><span>Integrity</span><span>Service</span></div>
+    </section>
+
+    <section class="contact" id="contact">
+      <h2 class="section-title">Join Us</h2>
+      <p class="intro">We welcome you to grow with us in faith as we make Christ known.</p>
+      <p><strong>Location:</strong> Katoogo, Uganda</p>
+    </section>
+  </main>
+
+  <footer>&copy; <span id="year"></span> Refiners Chapel Katoogo. All rights reserved.</footer>
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>
