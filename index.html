@@ -52,6 +52,24 @@ footer{background:#08172f;color:#d6dfed;padding:32px 0}.footer-inner{display:fle
 .leader-monogram{font-family:Georgia,serif}
 @media(max-width:800px){.ministry-grid{grid-template-columns:1fr}.ministry-card{min-height:185px}.sermon-panel{grid-template-columns:1fr}}
 
+  
+/* International media gallery */
+.gallery-heading{display:flex;justify-content:space-between;align-items:end;gap:22px;flex-wrap:wrap;margin:46px 0 20px}
+.gallery-heading h3{font:500 clamp(1.7rem,3vw,2.25rem) Georgia,serif;color:var(--navy);margin:5px 0}
+.gallery-heading p{margin:0;color:var(--muted);max-width:570px}
+.gallery-filters{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 22px}
+.gallery-filter{border:1px solid #dce3ed;background:#fff;color:#344966;border-radius:30px;padding:9px 17px;font:750 .8rem Inter,Arial,sans-serif;cursor:pointer;transition:all .2s}
+.gallery-filter:hover,.gallery-filter[aria-pressed="true"]{background:#102653;color:#fff;border-color:#102653}
+.gallery-empty{grid-column:1/-1;min-height:235px;border:1px dashed #cbd5e3;border-radius:12px;background:linear-gradient(145deg,#fff,#f6f8fb);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px}
+.gallery-empty-mark{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;background:#f7efd9;color:#94701e;font:500 1.6rem Georgia,serif;margin-bottom:13px}
+.gallery-empty h4{font:500 1.5rem Georgia,serif;color:var(--navy);margin:0 0 7px}
+.gallery-empty p{max-width:520px;color:var(--muted);margin:0 0 17px}
+.gallery-empty a{color:#8e6c1d;font-weight:800;text-decoration:none;border-bottom:1px solid #d9ad3e;padding-bottom:3px}
+.gallery-count{font-size:.76rem;color:var(--muted);font-weight:700;margin:0 0 14px}
+.public-media figure{box-shadow:0 8px 24px rgba(16,38,83,.055);transition:transform .2s,box-shadow .2s}
+.public-media figure:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+@media(max-width:650px){.gallery-heading{align-items:flex-start}.gallery-filters{gap:7px}.gallery-filter{padding:8px 13px}}
+
   </style>
 </head>
 <body>\n  <a class="skip-link" href="#main-content">Skip to content</a>
@@ -106,6 +124,14 @@ footer{background:#08172f;color:#d6dfed;padding:32px 0}.footer-inner{display:fle
       <div class="container">
         <div class="section-heading"><div class="kicker">Church News & Media</div><h2>Latest Updates</h2><p>Announcements, photos and media shared by our church team.</p></div>
         <div id="public-announcements" class="public-updates"><p>Loading church announcements...</p></div>
+        <div class="gallery-heading"><div><div class="kicker">Explore Our Moments</div><h3>Church Media Gallery</h3><p>Photos, messages and resources from the life of Refiners Chapel Katoogo.</p></div></div>
+        <div class="gallery-filters" role="group" aria-label="Filter church media">
+          <button class="gallery-filter" type="button" data-filter="all" aria-pressed="true">All Media</button>
+          <button class="gallery-filter" type="button" data-filter="image" aria-pressed="false">Photos</button>
+          <button class="gallery-filter" type="button" data-filter="video" aria-pressed="false">Videos</button>
+          <button class="gallery-filter" type="button" data-filter="document" aria-pressed="false">Documents</button>
+        </div>
+        <p id="gallery-count" class="gallery-count" aria-live="polite">Loading gallery...</p>
         <div id="public-media" class="public-media"><p>Loading church media...</p></div>
       </div>
     </section>
@@ -267,24 +293,45 @@ footer{background:#08172f;color:#d6dfed;padding:32px 0}.footer-inner{display:fle
         const date=document.createElement("small");date.textContent=new Date(item.created_at).toLocaleDateString();card.appendChild(date);
         announcementsBox.appendChild(card);
       });
-      const {data:media,error:mediaError}=await client.from("media_assets").select("title,description,storage_path,mime_type").eq("is_public",true).order("created_at",{ascending:false}).limit(12);
-      mediaBox.replaceChildren();
-      if(mediaError){mediaBox.textContent="Church photos and media will appear here soon.";return;}
-      media.forEach(item=>{
-        const url=client.storage.from("church-media").getPublicUrl(item.storage_path).data.publicUrl;
-        const figure=document.createElement("figure");
-        if(item.mime_type&&item.mime_type.startsWith("image/")){
-          const img=document.createElement("img");img.src=url;img.alt=item.title||"Church photo";img.loading="lazy";figure.appendChild(img);
-        }else if(item.mime_type&&item.mime_type.startsWith("video/")){
-          const video=document.createElement("video");video.src=url;video.controls=true;video.preload="metadata";figure.appendChild(video);
-        }else{
-          const doc=document.createElement("div");doc.style.padding="28px 16px";doc.textContent="Church document · PDF";figure.appendChild(doc);
+      const {data:media,error:mediaError}=await client.from("media_assets").select("title,description,storage_path,mime_type").eq("is_public",true).order("created_at",{ascending:false}).limit(30);
+      const countBox=document.getElementById("gallery-count");
+      const filterButtons=[...document.querySelectorAll(".gallery-filter")];
+      let activeFilter="all";
+      const mediaType=item=>item.mime_type&&item.mime_type.startsWith("image/")?"image":item.mime_type&&item.mime_type.startsWith("video/")?"video":"document";
+      const renderGallery=()=>{
+        mediaBox.replaceChildren();
+        const visible=media.filter(item=>activeFilter==="all"||mediaType(item)===activeFilter);
+        countBox.textContent=visible.length+" "+(visible.length===1?"item":"items")+" in the gallery";
+        if(!visible.length){
+          const empty=document.createElement("div");empty.className="gallery-empty";
+          const mark=document.createElement("div");mark.className="gallery-empty-mark";mark.textContent="✦";empty.appendChild(mark);
+          const title=document.createElement("h4");title.textContent=media.length?"No items in this category yet":"Our gallery is being prepared";empty.appendChild(title);
+          const message=document.createElement("p");message.textContent=media.length?"Choose another category to explore the church media.":"Church photos, worship moments, sermons and resources will appear here as the media team shares and publishes them.";empty.appendChild(message);
+          if(!media.length){const link=document.createElement("a");link.href="admin.html";link.textContent="Share church media";empty.appendChild(link);}
+          mediaBox.appendChild(empty);return;
         }
-        const caption=document.createElement("figcaption");caption.textContent=item.title||"Church media";
-        if(item.mime_type==="application/pdf"){const link=document.createElement("a");link.href=url;link.target="_blank";link.rel="noopener";link.textContent="Open document";caption.appendChild(document.createTextNode(" · "));caption.appendChild(link);}
-        figure.appendChild(caption);mediaBox.appendChild(figure);
-      });
-      if(!media.length)mediaBox.textContent="Church photos and media will appear here soon.";
+        visible.forEach(item=>{
+          const url=client.storage.from("church-media").getPublicUrl(item.storage_path).data.publicUrl;
+          const figure=document.createElement("figure");
+          if(mediaType(item)==="image"){
+            const img=document.createElement("img");img.src=url;img.alt=item.title||"Church photo";img.loading="lazy";figure.appendChild(img);
+          }else if(mediaType(item)==="video"){
+            const video=document.createElement("video");video.src=url;video.controls=true;video.preload="metadata";video.setAttribute("aria-label",item.title||"Church video");figure.appendChild(video);
+          }else{
+            const doc=document.createElement("div");doc.style.cssText="min-height:190px;display:grid;place-items:center;padding:28px 16px;background:#f3f6fb;color:#8e6c1d;font-weight:800";doc.textContent="PDF RESOURCE";figure.appendChild(doc);
+          }
+          const caption=document.createElement("figcaption");caption.textContent=item.title||"Church media";
+          if(item.mime_type==="application/pdf"){const link=document.createElement("a");link.href=url;link.target="_blank";link.rel="noopener";link.textContent="Open document";caption.appendChild(document.createTextNode(" · "));caption.appendChild(link);}
+          figure.appendChild(caption);mediaBox.appendChild(figure);
+        });
+      };
+      filterButtons.forEach(button=>button.addEventListener("click",()=>{
+        activeFilter=button.dataset.filter;
+        filterButtons.forEach(item=>item.setAttribute("aria-pressed",String(item===button)));
+        if(!mediaError)renderGallery();
+      }));
+      if(mediaError){countBox.textContent="Gallery temporarily unavailable";mediaBox.textContent="Church photos and media will appear here soon.";return;}
+      renderGallery();
     })();
   </script>
 </body>
