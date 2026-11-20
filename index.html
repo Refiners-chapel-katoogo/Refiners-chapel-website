@@ -336,7 +336,6 @@ footer{background:#08172f;color:#d6dfed;padding:32px 0}.footer-inner{display:fle
       const dots=[...document.querySelectorAll(".welcome-dot")];
       const previous=document.getElementById("welcome-prev");
       const next=document.getElementById("welcome-next");
-      const reduceMotion=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       let current=0,timer=null;
       function show(index){
         current=(index+slides.length)%slides.length;
@@ -344,14 +343,10 @@ footer{background:#08172f;color:#d6dfed;padding:32px 0}.footer-inner{display:fle
         dots.forEach((dot,i)=>{const active=i===current;dot.classList.toggle("is-active",active);dot.setAttribute("aria-pressed",String(active));});
       }
       function stop(){if(timer){clearInterval(timer);timer=null;}}
-      function start(){stop();if(!reduceMotion)timer=setInterval(()=>show(current+1),6500);}
+      function start(){stop();timer=setInterval(()=>show(current+1),6500);}
       previous.addEventListener("click",()=>{show(current-1);start();});
       next.addEventListener("click",()=>{show(current+1);start();});
       dots.forEach(dot=>dot.addEventListener("click",()=>{show(Number(dot.dataset.slide));start();}));
-      slider.addEventListener("mouseenter",stop);
-      slider.addEventListener("mouseleave",start);
-      slider.addEventListener("focusin",stop);
-      slider.addEventListener("focusout",start);
       document.addEventListener("visibilitychange",()=>document.hidden?stop():start());
       show(0);start();
     })();
