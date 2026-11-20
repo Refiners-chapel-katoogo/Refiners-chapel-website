@@ -80,7 +80,16 @@
     footer small{color:#aeb9ca}
     .back-top{color:var(--gold-light);text-decoration:none;font-weight:700}
     :focus-visible{outline:3px solid var(--gold);outline-offset:3px}
-    @media(max-width:800px){
+
+    .public-updates{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:34px}
+    .public-announcement{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:0 8px 24px rgba(16,29,54,.05)}
+    .public-announcement h3{color:var(--navy);margin:0 0 8px}.public-announcement p{color:var(--muted);white-space:pre-wrap;margin:8px 0}.public-announcement small{color:var(--muted)}
+    .urgent-label{display:inline-block;color:#9f2029;font-size:.76rem;font-weight:850;letter-spacing:.06em;margin-bottom:7px}
+    .public-media{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
+    .public-media figure{margin:0;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+    .public-media img,.public-media video{width:100%;height:190px;object-fit:cover;background:#e9edf2}
+    .public-media figcaption{padding:12px 14px;color:var(--navy);font-weight:750}.public-media a{color:#8a641b}
+\n    @media(max-width:800px){
       .nav-wrap{min-height:72px}.menu-toggle{display:block}
       nav{display:none;position:absolute;left:0;right:0;top:72px;background:var(--navy);padding:18px 22px 24px;flex-direction:column;align-items:flex-start;gap:16px;border-top:1px solid rgba(255,255,255,.12)}
       nav.open{display:flex}.about-grid,.document-wrap{grid-template-columns:1fr}.pillars{grid-template-columns:1fr}.hero{padding:86px 18px 94px}
@@ -99,7 +108,7 @@
       </a>
       <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-nav">Menu</button>
       <nav id="main-nav" aria-label="Main navigation">
-        <a href="#about">About</a><a href="#vision">Vision &amp; Mission</a><a href="#values">Core Principles</a><a href="#constitution">Document</a><a href="#visit">Visit Us</a><a href="admin.html">Dashboard</a>
+        <a href="#updates">Updates</a><a href="#about">About</a><a href="#vision">Vision &amp; Mission</a><a href="#values">Core Principles</a><a href="#constitution">Document</a><a href="#visit">Visit Us</a><a href="admin.html">Dashboard</a>
       </nav>
     </div>
   </header>
@@ -114,6 +123,15 @@
           <a class="btn btn-gold" href="#vision">Discover Our Vision</a>
           <a class="btn btn-outline" href="#visit">Plan a Visit</a>
         </div>
+      </div>
+    </section>
+
+
+    <section class="section section-cream" id="updates">
+      <div class="container">
+        <div class="section-heading"><div class="kicker">Church News & Media</div><h2>Latest Updates</h2><p>Announcements, photos and media shared by our church team.</p></div>
+        <div id="public-announcements" class="public-updates"><p>Loading church announcements...</p></div>
+        <div id="public-media" class="public-media"><p>Loading church media...</p></div>
       </div>
     </section>
 
@@ -210,6 +228,7 @@
       <a class="back-top" href="#home">Back to top ↑</a>
     </div>
   </footer>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4"></script>
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
     const menuButton = document.querySelector(".menu-toggle");
@@ -222,6 +241,44 @@
       nav.classList.remove("open");
       menuButton.setAttribute("aria-expanded", "false");
     }));
+
+    (async function loadPublicChurchUpdates(){
+      const SUPABASE_URL = "https://oicliipexupbgjmongpx.supabase.co";
+      const SUPABASE_KEY = "sb_publishable_NR9zwbcZA-rnWE14hAhNAQ_75EEGwNp";
+      const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      const announcementsBox = document.getElementById("public-announcements");
+      const mediaBox = document.getElementById("public-media");
+      const {data: announcements, error: announcementError} = await client.from("announcements").select("title,body,is_urgent,created_at").eq("status","published").or("publish_at.is.null,publish_at.lte."+new Date().toISOString()).order("created_at",{ascending:false}).limit(6);
+      announcementsBox.replaceChildren();
+      if(announcementError){announcementsBox.textContent="Church announcements will appear here soon.";}
+      else if(!announcements.length){announcementsBox.textContent="There are no new announcements at the moment.";} 
+      else announcements.forEach(item=>{
+        const card=document.createElement("article");card.className="public-announcement";
+        if(item.is_urgent){const urgent=document.createElement("span");urgent.className="urgent-label";urgent.textContent="URGENT";card.appendChild(urgent);}
+        const title=document.createElement("h3");title.textContent=item.title;card.appendChild(title);
+        const body=document.createElement("p");body.textContent=item.body;card.appendChild(body);
+        const date=document.createElement("small");date.textContent=new Date(item.created_at).toLocaleDateString();card.appendChild(date);
+        announcementsBox.appendChild(card);
+      });
+      const {data:media,error:mediaError}=await client.from("media_assets").select("title,description,storage_path,mime_type").eq("is_public",true).order("created_at",{ascending:false}).limit(12);
+      mediaBox.replaceChildren();
+      if(mediaError){mediaBox.textContent="Church photos and media will appear here soon.";return;}
+      media.forEach(item=>{
+        const url=client.storage.from("church-media").getPublicUrl(item.storage_path).data.publicUrl;
+        const figure=document.createElement("figure");
+        if(item.mime_type&&item.mime_type.startsWith("image/")){
+          const img=document.createElement("img");img.src=url;img.alt=item.title||"Church photo";img.loading="lazy";figure.appendChild(img);
+        }else if(item.mime_type&&item.mime_type.startsWith("video/")){
+          const video=document.createElement("video");video.src=url;video.controls=true;video.preload="metadata";figure.appendChild(video);
+        }else{
+          const doc=document.createElement("div");doc.style.padding="28px 16px";doc.textContent="Church document · PDF";figure.appendChild(doc);
+        }
+        const caption=document.createElement("figcaption");caption.textContent=item.title||"Church media";
+        if(item.mime_type==="application/pdf"){const link=document.createElement("a");link.href=url;link.target="_blank";link.rel="noopener";link.textContent="Open document";caption.appendChild(document.createTextNode(" · "));caption.appendChild(link);}
+        figure.appendChild(caption);mediaBox.appendChild(figure);
+      });
+      if(!media.length)mediaBox.textContent="Church photos and media will appear here soon.";
+    })();
   </script>
 </body>
 </html>
