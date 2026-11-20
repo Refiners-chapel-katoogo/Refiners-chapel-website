@@ -100,7 +100,7 @@ async function loadMedia(){
 $('loginBtn').addEventListener('click',async()=>{
  $('loginMsg').textContent='Checking church PIN...';
  const pin=$('churchPin').value.trim();
- if(!/^\\d{8,64}$/.test(pin)){$('loginMsg').textContent='Enter the 8-digit-or-longer church PIN.';return;}
+ if(!/^\d{8,64}$/.test(pin)){$('loginMsg').textContent='Enter the 8-digit-or-longer church PIN.';return;}
  const {data,error}=await db.auth.signInWithPassword({email:'media-team@oicliipexupbgjmongpx.supabase.co',password:pin});
  if(error){$('loginMsg').textContent='The PIN was not accepted. Check it with the church administrator and try again.';return;}
  await enterSession(data.session);
