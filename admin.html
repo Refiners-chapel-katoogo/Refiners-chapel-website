@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Church Dashboard | Refiners Chapel Katoogo</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--navy:#102b46;--gold:#d6a64b;--bg:#f3f6fa;--ink:#1d2939;--muted:#667085;--line:#e5eaf0}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font:15px/1.5 Arial,sans-serif;color:var(--ink)}
+header{background:var(--navy);color:white;padding:22px max(5%,calc((100% - 1100px)/2));display:flex;justify-content:space-between;align-items:center;gap:12px}
+header strong{font-size:18px}header a{color:white;text-decoration:none}
+main{max-width:1100px;margin:28px auto;padding:0 16px}.panel{background:white;border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:18px;box-shadow:0 4px 18px #102b460a}
+h1,h2{margin:0 0 12px;color:var(--navy)}h1{font-size:25px}h2{font-size:19px}
+p{color:var(--muted)}label{display:block;font-weight:600;margin:12px 0 5px}
+input,textarea,select{width:100%;padding:12px;border:1px solid #cfd7e2;border-radius:8px;font:inherit;background:white}
+textarea{min-height:100px;resize:vertical}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+button{border:0;border-radius:8px;padding:11px 16px;background:var(--gold);color:#182638;font-weight:700;cursor:pointer;margin:8px 6px 0 0}
+button.secondary{background:#e9eef4;color:var(--navy)}button.danger{background:#fee4e2;color:#b42318}
+.hidden{display:none!important}.status{padding:10px 12px;border-radius:8px;background:#eef4fb;color:var(--navy);margin:12px 0}.item{border-top:1px solid var(--line);padding:14px 0}.item:first-child{border-top:0}.item small{color:var(--muted)}
+img.preview{max-width:150px;max-height:110px;object-fit:cover;border-radius:8px;display:block;margin:8px 0}
+@media(max-width:600px){header{align-items:flex-start;flex-direction:column}main{margin-top:16px}.panel{padding:17px}}
+</style>
+</head>
+<body>
+<header><strong>REFINERS CHAPEL KATOOGO</strong><a href="./index.html">← Back to church website</a></header>
+<main>
+<section class="panel" id="loginPanel">
+<h1>Church Administration</h1>
+<p>Sign in with an authorized church staff account to manage announcements and media.</p>
+<div class="grid"><div><label for="email">Email address</label><input id="email" type="email" autocomplete="username" placeholder="name@example.com"></div><div><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" placeholder="Your password"></div></div>
+<button id="loginBtn">Sign in</button><div id="loginMsg" class="status" role="status">Only approved pastor, admin and editor accounts can access this dashboard.</div>
+</section>
+<section id="dashboard" class="hidden">
+<div class="panel"><div class="grid"><div><h1>Dashboard</h1><p id="who"></p></div><div style="text-align:right"><button class="secondary" id="refreshBtn">Refresh</button><button class="secondary" id="logoutBtn">Sign out</button></div></div></div>
+<div class="panel">
+<h2>Publish an announcement</h2>
+<label for="annTitle">Title</label><input id="annTitle" maxlength="180" placeholder="Announcement title">
+<label for="annBody">Message</label><textarea id="annBody" placeholder="Write the announcement..."></textarea>
+<div class="grid"><div><label for="annStatus">Status</label><select id="annStatus"><option value="draft">Save as draft</option><option value="published">Publish now</option></select></div><div style="display:flex;align-items:end"><label style="display:flex;gap:9px;align-items:center;margin-bottom:10px"><input id="urgent" type="checkbox" style="width:auto"> Mark as urgent</label></div></div>
+<button id="saveAnn">Save announcement</button><div id="annMsg" class="status hidden"></div>
+<h2 style="margin-top:24px">Announcements</h2><div id="annList"><p>Sign in to load announcements.</p></div>
+</div>
+<div class="panel">
+<h2>Media library</h2><p>Upload church photos, videos or PDF documents (maximum 50 MB per file).</p>
+<label for="mediaFile">Choose a file</label><input id="mediaFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,application/pdf">
+<button id="uploadBtn">Upload media</button><div id="mediaMsg" class="status hidden"></div>
+<div id="mediaList"></div>
+</div>
+</section>
+</main>
+<script>
+(() => {
+const SUPABASE_URL = 'https://oicliipexupbgjmongpx.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_NR9zwbcZA-rnWE14hAhNAQ_75EEGwNp';
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const $ = id => document.getElementById(id);
+let currentRole = null;
+const say = (id, message) => { $(id).textContent = message; $(id).classList.remove('hidden'); };
+const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function enterSession(session) {
+  const {data:profile,error} = await db.from('profiles').select('role, full_name').eq('id',session.user.id).single();
+  if(error || !profile || !['pastor','admin','editor'].includes(profile.role)) {
+    await db.auth.signOut();
+    $('loginMsg').textContent = 'This account is not yet approved for dashboard access. Ask the church administrator to assign your staff role.';
+    return;
+  }
+  currentRole = profile.role;
+  $('loginPanel').classList.add('hidden'); $('dashboard').classList.remove('hidden');
+  $('who').textContent = (profile.full_name || session.user.email) + ' · ' + currentRole;
+  await refreshAll();
+}
+async function refreshAll(){ await loadAnnouncements(); await loadMedia(); }
+async function loadAnnouncements(){
+  const {data,error} = await db.from('announcements').select('*').order('created_at',{ascending:false}).limit(50);
+  if(error){$('annList').textContent='Could not load announcements: '+error.message;return;}
+  $('annList').innerHTML = data.length ? data.map(a => '<div class="item"><strong>'+esc(a.title)+'</strong> '+(a.is_urgent?'<b style="color:#b42318">· URGENT</b>':'')+'<br><small>'+esc(a.status)+' · '+esc(new Date(a.created_at).toLocaleString())+'</small><p>'+esc(a.body).replace(/\n/g,'<br>')+'</p>'+(currentRole==='pastor'?'<button class="danger" data-delete-ann="'+esc(a.id)+'">Delete permanently</button>':'')+'</div>').join('') : '<p>No announcements yet.</p>';
+  document.querySelectorAll('[data-delete-ann]').forEach(b=>b.addEventListener('click',async()=>{if(!confirm('Permanently delete this announcement?'))return;const {error}=await db.from('announcements').delete().eq('id',b.dataset.deleteAnn);if(error)alert(error.message);else loadAnnouncements();}));
+}
+async function loadMedia(){
+  const {data,error}=await db.storage.from('church-media').list('',{limit:100,sortBy:{column:'created_at',order:'desc'}});
+  if(error){$('mediaList').textContent='Could not load media: '+error.message;return;}
+  $('mediaList').innerHTML=data.length?data.map(f=>{const path=f.name;const url=db.storage.from('church-media').getPublicUrl(path).data.publicUrl;return '<div class="item"><strong>'+esc(path)+'</strong><br><a href="'+esc(url)+'" target="_blank" rel="noopener">Open file</a>'+(currentRole==='pastor'?'<br><button class="danger" data-delete-media="'+esc(path)+'">Delete permanently</button>':'')+'</div>';}).join(''):'<p>No uploaded media yet.</p>';
+  document.querySelectorAll('[data-delete-media]').forEach(b=>b.addEventListener('click',async()=>{if(!confirm('Permanently delete this media file?'))return;const {error}=await db.storage.from('church-media').remove([b.dataset.deleteMedia]);if(error)alert(error.message);else loadMedia();}));
+}
+$('loginBtn').addEventListener('click',async()=>{const {data,error}=await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error){$('loginMsg').textContent=error.message;return;}await enterSession(data.session);});
+$('logoutBtn').addEventListener('click',async()=>{await db.auth.signOut();location.reload();});
+$('refreshBtn').addEventListener('click',refreshAll);
+$('saveAnn').addEventListener('click',async()=>{
+ const title=$('annTitle').value.trim(),body=$('annBody').value.trim();
+ if(!title||!body){say('annMsg','Please enter both a title and message.');return;}
+ const {data:userData}=await db.auth.getUser();
+ const {error}=await db.from('announcements').insert({title,body,status:$('annStatus').value,is_urgent:$('urgent').checked,created_by:userData.user.id});
+ if(error){say('annMsg','Could not save: '+error.message);return;}
+ $('annTitle').value='';$('annBody').value='';$('urgent').checked=false;say('annMsg','Announcement saved.');await loadAnnouncements();
+});
+$('uploadBtn').addEventListener('click',async()=>{
+ const file=$('mediaFile').files[0];if(!file){say('mediaMsg','Choose a file first.');return;}
+ if(file.size>50*1024*1024){say('mediaMsg','The file is larger than 50 MB.');return;}
+ const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+ const path=Date.now()+'-'+safeName;
+ const {data:userData}=await db.auth.getUser();
+ const {error}=await db.storage.from('church-media').upload(path,file,{upsert:false,contentType:file.type,metadata:{uploaded_by:userData.user.id}});
+ if(error){say('mediaMsg','Upload failed: '+error.message);return;}
+ $('mediaFile').value='';say('mediaMsg','Upload complete.');await loadMedia();
+});
+db.auth.getSession().then(({data})=>{if(data.session)enterSession(data.session);});
+})();
+</script>
+</body>
+</html>
