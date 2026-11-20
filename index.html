@@ -85,7 +85,14 @@ footer{background:#08172f;color:#d6dfed;padding:32px 0}.footer-inner{display:fle
 /* Three branded welcome slides in the opening hero */
 .welcome-slider{position:relative;min-height:370px;display:grid;align-items:center}
 .welcome-slide{grid-area:1/1;opacity:0;visibility:hidden;transform:translateY(18px);transition:opacity .75s ease,transform .75s ease,visibility .75s;pointer-events:none}
-.welcome-slide.is-active{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto}
+.welcome-slide.is-active{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto;animation:welcomeZoom 5s ease-in-out both}
+@keyframes welcomeZoom{
+  0%{transform:scale(.94);filter:blur(1px)}
+  35%{transform:scale(1.025);filter:blur(0)}
+  70%{transform:scale(1.045);filter:blur(0)}
+  100%{transform:scale(1);filter:blur(0)}
+}
+.welcome-controls{display:none!important}
 .welcome-slide h1{max-width:780px}
 .welcome-slide p{max-width:680px}
 .welcome-controls{display:flex;align-items:center;gap:13px;margin-top:25px}
@@ -343,7 +350,7 @@ footer{background:#08172f;color:#d6dfed;padding:32px 0}.footer-inner{display:fle
         dots.forEach((dot,i)=>{const active=i===current;dot.classList.toggle("is-active",active);dot.setAttribute("aria-pressed",String(active));});
       }
       function stop(){if(timer){clearInterval(timer);timer=null;}}
-      function start(){stop();timer=setInterval(()=>show(current+1),6500);}
+      function start(){stop();timer=setInterval(()=>show(current+1),5000);}
       previous.addEventListener("click",()=>{show(current-1);start();});
       next.addEventListener("click",()=>{show(current+1);start();});
       dots.forEach(dot=>dot.addEventListener("click",()=>{show(Number(dot.dataset.slide));start();}));
