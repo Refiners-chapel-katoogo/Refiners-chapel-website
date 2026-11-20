@@ -29,6 +29,7 @@ footer{padding:22px 0;color:var(--muted);font-size:12px}
 <section class="hero"><div class="eyebrow">Church media & communications</div><h1>Staff review centre</h1><p>Review incoming submissions and manage what is published on the church website.</p></section>
 <section class="panel login" id="loginPanel"><h2>Staff sign in</h2><p class="muted">Sign in with your church staff account. Access is limited to approved pastor, admin and editor roles.</p>
 <form id="loginForm"><label for="email">Staff email</label><input id="email" type="email" autocomplete="username" required placeholder="Enter your staff email"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required placeholder="Enter your password"><button class="btn" id="loginBtn" type="submit" style="width:100%;margin-top:18px">Sign in securely</button></form><div class="status" id="loginStatus" role="status"></div></section>
+<section id="dashboard" hidden>
 <section class="panel" id="pastorProfilePanel" style="margin-bottom:20px">
 <h2>Pastor Abby profile picture</h2>
 <p class="muted">Upload or change the photo displayed in the Pastoral Leadership section of the public church website.</p>
@@ -43,7 +44,6 @@ footer{padding:22px 0;color:var(--muted);font-size:12px}
 </form>
 </div>
 </section>
-<section class="panel" id="dashboard" hidden>
 <div class="stats"><div class="stat"><strong id="pendingCount">0</strong><span>Pending review</span></div><div class="stat"><strong id="approvedCount">0</strong><span>Approved</span></div><div class="stat"><strong id="rejectedCount">0</strong><span>Rejected</span></div></div>
 <div class="toolbar"><div><h2 style="margin:0;color:var(--navy);font:700 25px Georgia">Content submissions</h2><div class="muted" style="font-size:13px">Review first. Nothing is published without staff approval.</div></div><div class="filters"><button class="filter active" data-filter="pending">Pending</button><button class="filter" data-filter="approved">Approved</button><button class="filter" data-filter="rejected">Rejected</button><button class="filter" data-filter="all">All</button></div><button class="btn secondary small" id="refreshBtn">Refresh</button></div>
 <div class="cards" id="submissionList"><div class="empty">Loading submissions…</div></div>
