@@ -29,7 +29,21 @@ footer{padding:22px 0;color:var(--muted);font-size:12px}
 <section class="hero"><div class="eyebrow">Church media & communications</div><h1>Staff review centre</h1><p>Review incoming submissions and manage what is published on the church website.</p></section>
 <section class="panel login" id="loginPanel"><h2>Staff sign in</h2><p class="muted">Sign in with your church staff account. Access is limited to approved pastor, admin and editor roles.</p>
 <form id="loginForm"><label for="email">Staff email</label><input id="email" type="email" autocomplete="username" required placeholder="Enter your staff email"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required placeholder="Enter your password"><button class="btn" id="loginBtn" type="submit" style="width:100%;margin-top:18px">Sign in securely</button></form><div class="status" id="loginStatus" role="status"></div></section>
-<section id="dashboard" hidden>
+<section class="panel" id="pastorProfilePanel" style="margin-bottom:20px">
+<h2>Pastor Abby profile picture</h2>
+<p class="muted">Upload or change the photo displayed in the Pastoral Leadership section of the public church website.</p>
+<div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+<div id="pastorPhotoPreview" style="width:104px;height:104px;border-radius:50%;border:4px solid #f3e8c8;outline:1px solid var(--gold);background:linear-gradient(145deg,#102653,#1b4c8d);color:#f2d98e;display:grid;place-items:center;font:500 30px Georgia,serif;overflow:hidden">PA</div>
+<form id="pastorPhotoForm" style="flex:1;min-width:230px">
+<label for="pastorPhotoFile">Choose Pastor Abby's photo</label>
+<input id="pastorPhotoFile" type="file" accept="image/jpeg,image/png,image/webp" required>
+<p class="muted" style="font-size:12px;margin:7px 0">JPG, PNG or WebP · Maximum 5 MB. The photo appears publicly on the church website.</p>
+<button class="btn" id="pastorPhotoBtn" type="submit">Upload profile picture</button>
+<div class="status" id="pastorPhotoStatus" role="status" aria-live="polite"></div>
+</form>
+</div>
+</section>
+<section class="panel" id="dashboard" hidden>
 <div class="stats"><div class="stat"><strong id="pendingCount">0</strong><span>Pending review</span></div><div class="stat"><strong id="approvedCount">0</strong><span>Approved</span></div><div class="stat"><strong id="rejectedCount">0</strong><span>Rejected</span></div></div>
 <div class="toolbar"><div><h2 style="margin:0;color:var(--navy);font:700 25px Georgia">Content submissions</h2><div class="muted" style="font-size:13px">Review first. Nothing is published without staff approval.</div></div><div class="filters"><button class="filter active" data-filter="pending">Pending</button><button class="filter" data-filter="approved">Approved</button><button class="filter" data-filter="rejected">Rejected</button><button class="filter" data-filter="all">All</button></div><button class="btn secondary small" id="refreshBtn">Refresh</button></div>
 <div class="cards" id="submissionList"><div class="empty">Loading submissions…</div></div>
@@ -64,6 +78,31 @@ $('loginForm').addEventListener('submit',async e=>{
  b.disabled=false;b.textContent='Sign in securely';
 });
 $('signOut').addEventListener('click',async()=>{await db.auth.signOut();user=null;profile=null;showLogin();notice('loginStatus','You have signed out.');});
+$('pastorPhotoFile').addEventListener('change',()=>{
+ const file=$('pastorPhotoFile').files[0],preview=$('pastorPhotoPreview');
+ if(!file)return;
+ if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>5*1024*1024){notice('pastorPhotoStatus','Choose a JPG, PNG or WebP image no larger than 5 MB.',true);$('pastorPhotoFile').value='';return;}
+ const reader=new FileReader();reader.onload=()=>{preview.innerHTML='';const img=document.createElement('img');img.src=reader.result;img.alt='Pastor Abby photo preview';img.style.cssText='width:100%;height:100%;object-fit:cover';preview.appendChild(img);};reader.readAsDataURL(file);
+});
+$('pastorPhotoForm').addEventListener('submit',async e=>{
+ e.preventDefault();const file=$('pastorPhotoFile').files[0],button=$('pastorPhotoBtn');
+ if(!file)return;
+ if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>5*1024*1024){notice('pastorPhotoStatus','Choose a JPG, PNG or WebP image no larger than 5 MB.',true);return;}
+ button.disabled=true;button.textContent='Uploading photo…';
+ try{
+  const ext=file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg';
+  const path='pastor-profiles/'+Date.now()+'-pastor-abby.'+ext;
+  const {error:uploadError}=await db.storage.from('church-media').upload(path,file,{upsert:false,contentType:file.type});
+  if(uploadError)throw uploadError;
+  const {error:rowError}=await db.from('media_assets').insert({title:'Pastor Abby Profile',description:'Official profile photograph for Pastor Abby.',storage_path:path,mime_type:file.type,is_public:true,uploaded_by:user.id});
+  if(rowError)throw rowError;
+  const publicUrl=db.storage.from('church-media').getPublicUrl(path).data.publicUrl;
+  const preview=$('pastorPhotoPreview');preview.innerHTML='';const img=document.createElement('img');img.src=publicUrl;img.alt='Pastor Abby profile photo';img.style.cssText='width:100%;height:100%;object-fit:cover';preview.appendChild(img);
+  notice('pastorPhotoStatus','Pastor Abby’s profile picture has been uploaded. Refresh the public website to see it.');
+  $('pastorPhotoFile').value='';
+ }catch(err){notice('pastorPhotoStatus','Could not upload the profile picture: '+(err.message||'Please try again.'),true);}
+ finally{button.disabled=false;button.textContent='Upload profile picture';}
+});
 async function loadRows(){
  $('submissionList').innerHTML='<div class="empty">Loading submissions…</div>';
  const {data,error}=await db.from('content_submissions').select('*').order('created_at',{ascending:false}).limit(150);
