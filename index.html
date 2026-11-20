@@ -187,7 +187,13 @@ footer{background:#08172f;color:#d6dfed;padding:32px 0}.footer-inner{display:fle
     <section class="section section-cream" id="updates">
       <div class="container">
         <div class="section-heading"><div class="kicker">Church News & Media</div><h2>Latest Updates</h2><p>Announcements, photos and media shared by our church team.</p></div>
-        <div id="public-announcements" class="public-updates"><p>Loading church announcements...</p></div>
+        <div id="public-announcements" class="public-updates">
+           <article class="public-announcement welcome-announcement">
+             <span class="kicker" style="color:#9a7623">A warm welcome</span>
+             <h3>Welcome to Refiners Chapel Katoogo</h3>
+             <p>We are delighted to have you here! You are welcome to worship, grow in faith, experience God's love and become part of our church family. May your life be transformed as we make Christ known together.</p>
+           </article>
+         </div>
         <div class="gallery-heading"><div><div class="kicker">Explore Our Moments</div><h3>Church Media Gallery</h3><p>Photos, messages and resources from the life of Refiners Chapel Katoogo.</p></div></div>
         <div class="gallery-filters" role="group" aria-label="Filter church media">
           <button class="gallery-filter" type="button" data-filter="all" aria-pressed="true">All Media</button>
@@ -381,17 +387,17 @@ footer{background:#08172f;color:#d6dfed;padding:32px 0}.footer-inner{display:fle
         photo.src=photoUrl;photo.hidden=false;document.getElementById("pastorProfileInitials").hidden=true;
       }
       const {data: announcements, error: announcementError} = await client.from("announcements").select("title,body,is_urgent,created_at").eq("status","published").or("publish_at.is.null,publish_at.lte."+new Date().toISOString()).order("created_at",{ascending:false}).limit(6);
-      announcementsBox.replaceChildren();
-      if(announcementError){announcementsBox.textContent="Church announcements will appear here soon.";}
-      else if(!announcements.length){announcementsBox.textContent="There are no new announcements at the moment.";} 
-      else announcements.forEach(item=>{
+      if(!announcementError && announcements && announcements.length){
+       announcementsBox.replaceChildren();
+       announcements.forEach(item=>{
         const card=document.createElement("article");card.className="public-announcement";
         if(item.is_urgent){const urgent=document.createElement("span");urgent.className="urgent-label";urgent.textContent="URGENT";card.appendChild(urgent);}
         const title=document.createElement("h3");title.textContent=item.title;card.appendChild(title);
         const body=document.createElement("p");body.textContent=item.body;card.appendChild(body);
         const date=document.createElement("small");date.textContent=new Date(item.created_at).toLocaleDateString();card.appendChild(date);
         announcementsBox.appendChild(card);
-      });
+       });
+      }
       const {data:media,error:mediaError}=await client.from("media_assets").select("title,description,storage_path,mime_type").eq("is_public",true).neq("title","Pastor Abby Profile").order("created_at",{ascending:false}).limit(30);
       const filterButtons=[...document.querySelectorAll(".gallery-filter")];
       let activeFilter="all";
