@@ -36,6 +36,22 @@ footer{background:#08172f;color:#d6dfed;padding:32px 0}.footer-inner{display:fle
 .welcome-section{background:#fff}.welcome-intro{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:end;margin-bottom:35px}.welcome-intro h2{margin-bottom:0}.welcome-intro>p{margin:0;color:var(--muted);max-width:540px}.welcome-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.welcome-card{min-height:205px;border:1px solid var(--line);padding:26px 25px 22px;border-radius:9px;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;background:linear-gradient(145deg,#fff,#fbfcfe);transition:transform .2s,box-shadow .2s}.welcome-card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}.welcome-icon{font-family:Georgia,serif;color:#b58b2c;font-size:1.5rem}.welcome-card h3{font-family:Georgia,serif;color:var(--navy);font-size:1.35rem;font-weight:500;margin:10px 0 5px}.welcome-card p{margin:0;color:var(--muted);font-size:.92rem}.card-rule{width:40px;height:2px;background:var(--gold);margin-top:20px}
 @media(max-width:800px){.leader-card{flex-direction:column;text-align:center}.leader-monogram{flex-basis:130px;width:130px;height:130px}.hero-layout{grid-template-columns:1fr;gap:44px}.hero-copy{text-align:center}.hero-copy .actions{justify-content:center}.hero-note{justify-content:center}.hero-emblem{min-height:300px}.emblem-ring{width:min(76vw,300px)}.emblem-inner img{width:95px;height:95px}.welcome-intro{grid-template-columns:1fr;gap:15px}.welcome-cards{grid-template-columns:1fr}.welcome-card{min-height:175px}}
 
+  
+.ministry-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.ministry-card{position:relative;min-height:220px;overflow:hidden;border-radius:10px;padding:27px;color:#fff;background:linear-gradient(145deg,#102653,#1d5595);display:flex;flex-direction:column;justify-content:flex-end;box-shadow:0 12px 30px rgba(16,38,83,.12)}
+.ministry-card:nth-child(2){background:linear-gradient(145deg,#263d60,#8b6a2c)}
+.ministry-card:nth-child(3){background:linear-gradient(145deg,#102b39,#28716c)}
+.ministry-card:before{content:"";position:absolute;width:190px;height:190px;border:1px solid rgba(255,255,255,.2);border-radius:50%;right:-55px;top:-65px;box-shadow:0 0 0 22px rgba(255,255,255,.035),0 0 0 45px rgba(255,255,255,.025)}
+.ministry-card .ministry-number{position:absolute;top:23px;left:27px;color:#f1d98e;font:500 1.4rem Georgia,serif}
+.ministry-card h3{position:relative;font:500 1.55rem Georgia,serif;margin:0 0 8px}
+.ministry-card p{position:relative;color:#e0e8f3;margin:0;font-size:.92rem;max-width:330px}
+.sermon-panel{display:grid;grid-template-columns:1fr auto;align-items:center;gap:28px;padding:clamp(28px,5vw,48px);border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--shadow)}
+.sermon-panel h3{font:500 clamp(1.6rem,3vw,2.2rem) Georgia,serif;color:var(--navy);margin:5px 0 9px}
+.sermon-panel p{color:var(--muted);margin:0;max-width:680px}
+.leader-card{position:relative}
+.leader-monogram{font-family:Georgia,serif}
+@media(max-width:800px){.ministry-grid{grid-template-columns:1fr}.ministry-card{min-height:185px}.sermon-panel{grid-template-columns:1fr}}
+
   </style>
 </head>
 <body>\n  <a class="skip-link" href="#main-content">Skip to content</a>
@@ -49,7 +65,7 @@ footer{background:#08172f;color:#d6dfed;padding:32px 0}.footer-inner{display:fle
       </a>
       <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-nav">Menu</button>
       <nav id="main-nav" aria-label="Main navigation">
-        <a href="#welcome">Welcome</a><a href="#updates">Updates</a><a href="#about">About</a><a href="#vision">Vision &amp; Mission</a><a href="#values">Our Values</a><a href="#leadership">Leadership</a><a href="#visit">Visit Us</a><a href="admin.html">Media Upload Centre</a>
+        <a href="#welcome">Welcome</a><a href="#updates">Updates</a><a href="#about">About</a><a href="#vision">Vision &amp; Mission</a><a href="#values">Our Values</a><a href="#ministries">Ministries</a><a href="#sermons">Sermons</a><a href="#leadership">Leadership</a><a href="#visit">Visit Us</a><a href="admin.html">Media Upload Centre</a>
       </nav>
     </div>
   </header>
@@ -166,6 +182,29 @@ footer{background:#08172f;color:#d6dfed;padding:32px 0}.footer-inner{display:fle
       </div>
     </section>
 
+
+
+    <section class="section section-cream" id="ministries">
+      <div class="container">
+        <div class="section-heading"><div class="kicker">Faith in Action</div><h2>Ministry &amp; Community</h2><p>Growing together in Christ through worship, spiritual formation and practical love for our neighbours.</p></div>
+        <div class="ministry-grid">
+          <article class="ministry-card"><span class="ministry-number">01</span><h3>Worship &amp; Prayer</h3><p>Making space to seek God, worship together and grow in a life of prayer.</p></article>
+          <article class="ministry-card"><span class="ministry-number">02</span><h3>Discipleship &amp; the Word</h3><p>Learning Scripture, strengthening faith and encouraging Christ-centred living.</p></article>
+          <article class="ministry-card"><span class="ministry-number">03</span><h3>Community &amp; Service</h3><p>Sharing hope, serving others and building a caring church community.</p></article>
+        </div>
+      </div>
+    </section>
+
+
+    <section class="section" id="sermons">
+      <div class="container">
+        <div class="section-heading"><div class="kicker">Watch &amp; Grow</div><h2>Sermons &amp; Messages</h2><p>Biblical teaching and church media to encourage your walk with Christ.</p></div>
+        <div class="sermon-panel">
+          <div><div class="kicker">Church Media Library</div><h3>Messages for faith, life and purpose</h3><p>Visit the latest updates and media gallery to watch messages and explore resources shared by the Refiners Chapel team. New content will appear here as it is approved and published.</p></div>
+          <a class="btn btn-gold" href="#updates">Explore Church Media →</a>
+        </div>
+      </div>
+    </section>
 
     <section class="section" id="leadership">
       <div class="container">
