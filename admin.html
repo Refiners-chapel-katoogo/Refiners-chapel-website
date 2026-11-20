@@ -31,7 +31,7 @@ button.secondary{background:#e9eef4;color:var(--navy)}button.danger{background:#
 <section class="panel" id="loginPanel">
 <h1>Church Media Dashboard</h1>
 <p>Upload church photos, videos and documents, and publish announcements directly from your phone.</p>
-<label for="churchPin">Shared church PIN</label><input id="churchPin" type="password" inputmode="text" minlength="8" maxlength="64" autocomplete="current-password" autocapitalize="off" spellcheck="false" placeholder="Enter the church PIN" aria-label="Shared church PIN">
+<label for="churchPin">Shared church PIN</label><div class="pin-row"><input id="churchPin" type="password" inputmode="text" minlength="8" maxlength="64" autocomplete="current-password" autocapitalize="off" spellcheck="false" placeholder="Enter the church PIN" aria-label="Shared church PIN"><button type="button" class="secondary" id="togglePin" aria-label="Show PIN" aria-pressed="false">Show</button></div>
 <button id="loginBtn">Sign in to dashboard</button>
 <div id="loginMsg" class="status" role="status">Enter the private PIN shared by the church leadership. Do not share it publicly. Sign-in attempts are protected by Supabase Auth.</div>
 </section>
@@ -97,6 +97,7 @@ async function loadMedia(){
  }).join(''):'<p>No media uploaded yet.</p>';
  document.querySelectorAll('[data-delete-media]').forEach(b=>b.addEventListener('click',async()=>{if(!confirm('Permanently delete this media file?'))return;const {error:storageError}=await db.storage.from('church-media').remove([b.dataset.path]);if(storageError){alert(storageError.message);return;}const {error}=await db.from('media_assets').delete().eq('id',b.dataset.deleteMedia);if(error)alert('File removed, but its media record could not be deleted: '+error.message);await loadMedia();}));
 }
+$('togglePin').addEventListener('click',()=>{const field=$('churchPin'),show=field.type==='password';field.type=show?'text':'password';$('togglePin').textContent=show?'Hide':'Show';$('togglePin').setAttribute('aria-label',show?'Hide PIN':'Show PIN');$('togglePin').setAttribute('aria-pressed',String(show));});
 $('loginBtn').addEventListener('click',async()=>{
  $('loginMsg').textContent='Checking church PIN...';
  const pin=$('churchPin').value.trim();
