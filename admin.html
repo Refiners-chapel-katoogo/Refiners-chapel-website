@@ -22,6 +22,7 @@ button.secondary{background:#e9eef4;color:var(--navy)}button.danger{background:#
 .item small{color:var(--muted)}.file-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.file-row img{width:86px;height:70px;object-fit:cover;border-radius:8px;background:#edf1f5}
 .checkline{display:flex;align-items:center;gap:9px;margin:12px 0}.checkline input{width:20px;height:20px}
 .top-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.hint{font-size:13px;color:var(--muted)}
+.pin-row{display:flex;gap:8px;align-items:stretch}.pin-row input{flex:1;min-width:0}.pin-row button{margin:0;white-space:nowrap}
 @media(max-width:600px){header{align-items:flex-start;flex-direction:column}main{margin:13px auto}.panel{padding:16px}h1{font-size:22px}button{width:100%;margin:7px 0 0}.top-actions button{width:auto;flex:1}}
 </style>
 </head>
@@ -34,6 +35,15 @@ button.secondary{background:#e9eef4;color:var(--navy)}button.danger{background:#
 <label for="churchPin">Shared church PIN</label><div class="pin-row"><input id="churchPin" type="password" inputmode="text" minlength="8" maxlength="64" autocomplete="current-password" autocapitalize="off" spellcheck="false" placeholder="Enter the church PIN" aria-label="Shared church PIN"><button type="button" class="secondary" id="togglePin" aria-label="Show PIN" aria-pressed="false">Show</button></div>
 <button id="loginBtn">Sign in to dashboard</button>
 <div id="loginMsg" class="status" role="status">Enter the private PIN shared by the church leadership. Do not share it publicly. Sign-in attempts are protected by Supabase Auth.</div>
+<div class="item" style="margin-top:18px">
+<h2>First-time PIN setup</h2>
+<p>For the pastor or authorized church administrator. Create the shared PIN once using the private setup code provided by the website administrator.</p>
+<label for="setupToken">One-time setup code</label><input id="setupToken" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Enter one-time setup code">
+<label for="newChurchPin">Create shared church PIN</label><input id="newChurchPin" type="password" inputmode="text" minlength="8" maxlength="64" autocomplete="new-password" autocapitalize="off" spellcheck="false" placeholder="Use 8–64 letters and numbers">
+<label for="confirmChurchPin">Confirm shared church PIN</label><input id="confirmChurchPin" type="password" inputmode="text" minlength="8" maxlength="64" autocomplete="new-password" autocapitalize="off" spellcheck="false" placeholder="Enter the same PIN again">
+<button type="button" class="secondary" id="setupPinBtn">Set up shared PIN</button>
+<div id="setupMsg" class="status hidden" role="status"></div>
+</div>
 </section>
 <section id="dashboard" class="hidden">
 <div class="panel">
@@ -98,6 +108,28 @@ async function loadMedia(){
  document.querySelectorAll('[data-delete-media]').forEach(b=>b.addEventListener('click',async()=>{if(!confirm('Permanently delete this media file?'))return;const {error:storageError}=await db.storage.from('church-media').remove([b.dataset.path]);if(storageError){alert(storageError.message);return;}const {error}=await db.from('media_assets').delete().eq('id',b.dataset.deleteMedia);if(error)alert('File removed, but its media record could not be deleted: '+error.message);await loadMedia();}));
 }
 $('togglePin').addEventListener('click',()=>{const field=$('churchPin'),show=field.type==='password';field.type=show?'text':'password';$('togglePin').textContent=show?'Hide':'Show';$('togglePin').setAttribute('aria-label',show?'Hide PIN':'Show PIN');$('togglePin').setAttribute('aria-pressed',String(show));});
+$('setupPinBtn').addEventListener('click',async()=>{
+ const token=$('setupToken').value.trim();
+ const pin=$('newChurchPin').value;
+ const confirmPin=$('confirmChurchPin').value;
+ if(!token){say('setupMsg','Enter the one-time setup code.');return;}
+ if(!/^[A-Za-z0-9]{8,64}$/.test(pin)){say('setupMsg','The PIN must contain 8–64 letters and numbers only.');return;}
+ if(pin!==confirmPin){say('setupMsg','The two PIN entries do not match.');return;}
+ const btn=$('setupPinBtn');btn.disabled=true;btn.textContent='Setting up...';
+ try{
+  const response=await fetch(SUPABASE_URL+'/functions/v1/setup-church-media-pin',{
+   method:'POST',
+   headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},
+   body:JSON.stringify({bootstrapToken:token,pin})
+  });
+  const result=await response.json();
+  if(!response.ok||!result.ok){say('setupMsg',result.error||'Setup failed. Please try again.');return;}
+  $('setupToken').value='';$('newChurchPin').value='';$('confirmChurchPin').value='';
+  $('churchPin').value=pin;
+  say('setupMsg','Shared PIN created successfully. Your PIN is ready in the sign-in field above. Tap “Sign in to dashboard”.');
+ }catch(_error){say('setupMsg','Could not reach the secure setup service. Check your internet connection and try again.');}
+ finally{btn.disabled=false;btn.textContent='Set up shared PIN';}
+});
 $('loginBtn').addEventListener('click',async()=>{
  $('loginMsg').textContent='Checking church PIN...';
  const pin=$('churchPin').value.trim();
