@@ -96,10 +96,42 @@
       .visit-card{align-items:flex-start;flex-direction:column;padding:30px}
     }
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
+  
+/* Visual refresh inspired by the supplied ministry website reference */
+:root{--navy:#102a5c;--navy-2:#174b9b;--gold:#e2b93b;--gold-light:#f4d978;--cream:#f7f9fd;--ink:#1e2b42;--muted:#66738a;--line:#e2e8f1;--shadow:0 16px 42px rgba(16,42,92,.10)}
+body{background:var(--cream);color:var(--ink);font-family:Arial,Helvetica,sans-serif}
+.topline{display:none}
+header{background:rgba(255,255,255,.98);color:var(--navy);box-shadow:0 3px 16px rgba(16,42,92,.08)}
+.brand{color:var(--navy)}
+.brand strong{color:var(--navy)}
+.brand small{color:var(--muted)}
+nav a{color:var(--navy)}
+nav a:hover,nav a:focus-visible{color:#b18712}
+.hero{background:linear-gradient(115deg,rgba(16,42,92,.97),rgba(23,75,155,.91)),radial-gradient(circle at 85% 20%,#416db5,transparent 45%);padding:clamp(76px,10vw,124px) 20px}
+.hero h1{font-family:Georgia,serif;letter-spacing:-.02em}
+.hero p{line-height:1.8;color:#e3eaf7}
+.btn{border-radius:4px}
+.btn-gold{background:var(--gold);color:#17284a}
+.section-cream{background:#edf3fc}
+.section-heading h2,.about-copy h2{font-family:Georgia,serif}
+.kicker{color:#b18712}
+.section-dark{background:var(--navy)}
+.pillar,.image-panel,.document-image,.public-announcement{border-radius:6px;box-shadow:var(--shadow)}
+.pillar{border-color:var(--line)}
+.visit-card{background:linear-gradient(115deg,#102a5c,#174b9b);border-radius:6px;border-left:5px solid var(--gold)}
+footer{background:#091a3a}
+@media(max-width:800px){nav{background:#fff;border-top:1px solid var(--line)}}
+
+  
+.reference-topbar{background:#102a5c;color:#e8eef8;padding:8px 0;font-size:13px;letter-spacing:.02em}
+.reference-topbar .container{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+@media(max-width:800px){.reference-topbar .container{justify-content:center;text-align:center}}
+
   </style>
 </head>
 <body>
   <div class="topline"></div>
+  <div class="reference-topbar"><div class="container"><span>REFINERS CHAPEL KATOOGO · KATOOGO, UGANDA</span><span>Making Christ Known · Transforming Lives · Aligning Destinies</span></div></div>
   <header>
     <div class="container nav-wrap">
       <a class="brand" href="#home" aria-label="Refiners Chapel Katoogo home">
@@ -108,7 +140,7 @@
       </a>
       <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-nav">Menu</button>
       <nav id="main-nav" aria-label="Main navigation">
-        <a href="#updates">Updates</a><a href="#about">About</a><a href="#vision">Vision &amp; Mission</a><a href="#values">Core Principles</a><a href="#constitution">Document</a><a href="#visit">Visit Us</a><a href="admin.html">Media Team Login</a>
+        <a href="#updates">Updates</a><a href="#about">About</a><a href="#vision">Vision &amp; Mission</a><a href="#values">Core Principles</a><a href="#constitution">Document</a><a href="#visit">Visit Us</a><a href="admin.html">Media Upload Centre</a>
       </nav>
     </div>
   </header>
@@ -225,7 +257,7 @@
     <div class="container footer-inner">
       <div><div class="footer-brand">REFINERS CHAPEL KATOOGO</div><small>Making Christ Known · Transforming Lives · Aligning Destinies</small></div>
       <small>© <span id="year"></span> Refiners Chapel Katoogo. All rights reserved.</small>
-      <a class="back-top" href="admin.html">Media Team Login</a>
+      <a class="back-top" href="admin.html">Media Upload Centre</a>
       <a class="back-top" href="#home">Back to top ↑</a>
     </div>
   </footer>
