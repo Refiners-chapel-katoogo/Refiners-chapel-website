@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#102653">
+<meta name="description" content="Watch and explore sermons and resources from Refiners Chapel Katoogo.">
+<title>Sermon & Media | Refiners Chapel Katoogo</title>
+<style>
+:root{--navy:#102653;--blue:#174a91;--gold:#d9ad3e;--ink:#1c2b43;--muted:#66758c;--paper:#f5f7fb;--line:#e5eaf2}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.7 Inter,Arial,sans-serif}.top{background:#0b1d3e;color:#fff;padding:18px 22px}.top a{color:#f1d98e;text-decoration:none;font-weight:800}.wrap{width:min(900px,calc(100% - 32px));margin:38px auto}.brand{font-size:.75rem;letter-spacing:.15em;color:#a77d20;font-weight:900}.card{background:#fff;border:1px solid var(--line);border-radius:13px;padding:clamp(20px,4vw,38px);box-shadow:0 18px 45px rgba(16,38,83,.08)}h1{font:500 clamp(2rem,5vw,3rem)/1.15 Georgia,serif;color:var(--navy);margin:8px 0 12px}#description{color:var(--muted);white-space:pre-wrap}.media-frame{margin:24px 0;background:#101d33;border-radius:9px;overflow:hidden}.media-frame video{display:block;width:100%;max-height:70vh;background:#101d33}.pdf-frame{min-height:220px;display:grid;place-items:center;background:#f3f6fb;color:#94701e;font-weight:900;letter-spacing:.12em}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}.btn{border:0;border-radius:6px;padding:12px 18px;background:var(--navy);color:#fff;text-decoration:none;font-weight:800;cursor:pointer}.btn.gold{background:var(--gold);color:#152747}.status{color:var(--muted);font-size:.9rem;margin-top:16px}.back{display:inline-block;margin-top:22px;color:var(--blue);font-weight:800;text-decoration:none}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4"></script>
+</head>
+<body>
+<header class="top"><a href="index.html">← Refiners Chapel Katoogo</a></header>
+<main class="wrap"><article class="card">
+<div class="brand">REFINERS CHAPEL KATOOGO · CHURCH MEDIA</div>
+<h1 id="title">Loading media…</h1>
+<p id="description"></p>
+<div id="media-frame" class="media-frame"></div>
+<div class="actions">
+<button class="btn" id="share-button" type="button">Share this message</button>
+<button class="btn gold" id="download-button" type="button" hidden>Download resource</button>
+</div>
+<p id="status" class="status" role="status" aria-live="polite">Loading your selected church media.</p>
+<a class="back" href="index.html#updates">← Back to church media gallery</a>
+</article></main>
+<script>
+(async function(){
+ const title=document.getElementById("title"),description=document.getElementById("description"),frame=document.getElementById("media-frame"),status=document.getElementById("status"),download=document.getElementById("download-button"),share=document.getElementById("share-button");
+ const id=new URLSearchParams(location.search).get("id");
+ if(!id){title.textContent="Media not found";status.textContent="Please return to the church media gallery and choose a sermon.";return;}
+ try{
+  if(!window.supabase)throw new Error("Media service unavailable. Please refresh.");
+  const client=window.supabase.createClient("https://oicliipexupbgjmongpx.supabase.co","sb_publishable_NR9zwbcZA-rnWE14hAhNAQ_75EEGwNp");
+  const {data:item,error}=await client.from("media_assets").select("id,title,description,storage_path,mime_type").eq("id",id).eq("is_public",true).maybeSingle();
+  if(error||!item)throw new Error("This media item could not be found or is not publicly available.");
+  document.title=(item.title||"Sermon")+" | Refiners Chapel Katoogo";
+  title.textContent=item.title||"Church message";description.textContent=item.description||"A message shared by Refiners Chapel Katoogo.";
+  const url=client.storage.from("church-media").getPublicUrl(item.storage_path).data.publicUrl;
+  if(item.mime_type&&item.mime_type.startsWith("video/")){
+   const video=document.createElement("video");video.src=url;video.controls=true;video.preload="metadata";video.playsInline=true;video.setAttribute("aria-label",item.title||"Church sermon video");frame.appendChild(video);
+  }else if(item.mime_type==="application/pdf"){
+   const pdf=document.createElement("div");pdf.className="pdf-frame";pdf.textContent="SERMON NOTES · PDF RESOURCE";frame.appendChild(pdf);
+   download.hidden=false;download.addEventListener("click",async()=>{
+    download.disabled=true;download.textContent="Preparing download…";
+    try{const response=await fetch(url);if(!response.ok)throw new Error("Download unavailable");const blob=await response.blob();const objectUrl=URL.createObjectURL(blob);const a=document.createElement("a");a.href=objectUrl;a.download=(item.title||"sermon-resource").replace(/[^a-z0-9-_]+/gi,"-")+".pdf";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(objectUrl);status.textContent="Your PDF download has started.";}
+    catch(e){window.open(url,"_blank","noopener");status.textContent="The PDF has been opened in a new tab. Use your browser's download option.";}
+    finally{download.disabled=false;download.textContent="Download resource";}
+   });
+  }else{
+   frame.className="pdf-frame";frame.textContent="MEDIA RESOURCE";status.textContent="This page is designed for sermon videos and PDF resources. Please return to the gallery for this item.";
+  }
+  share.addEventListener("click",async()=>{
+   const shareData={title:item.title||"Refiners Chapel Katoogo",text:item.description||"Church media from Refiners Chapel Katoogo",url:location.href};
+   try{if(navigator.share)await navigator.share(shareData);else if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(location.href);status.textContent="Link copied. You can now share it."; }else{window.prompt("Copy this link to share:",location.href);}}
+   catch(e){if(e.name!=="AbortError")window.prompt("Copy this link to share:",location.href);}
+  });
+  status.textContent="Enjoy this message from Refiners Chapel Katoogo.";
+ }catch(e){title.textContent="Media temporarily unavailable";status.textContent=e.message||"Please try again later.";}
+})();
+</script>
+</body></html>
