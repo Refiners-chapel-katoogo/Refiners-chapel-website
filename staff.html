@@ -12,7 +12,7 @@
 .top{background:#0b1d3e;color:#e6edf9;padding:10px 0;font-size:12px;letter-spacing:.07em}.top .shell{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
 header{background:#fff;border-bottom:1px solid var(--line)}.head{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{display:flex;align-items:center;gap:12px;color:var(--navy);font-weight:900;text-decoration:none}.mark{width:44px;height:44px;border-radius:7px;background:var(--navy);color:var(--gold);display:grid;place-items:center;font:700 25px Georgia}.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:2px;margin-top:3px}
 main{padding:38px 0 64px}.hero{background:linear-gradient(115deg,#102653,#174a91);color:#fff;padding:30px;border-radius:10px;margin-bottom:24px}.eyebrow{color:var(--gold);font-size:11px;letter-spacing:2px;font-weight:900;text-transform:uppercase}.hero h1{font:700 clamp(29px,4vw,40px)/1.15 Georgia,serif;margin:8px 0}.hero p{margin:0;color:#e2eafa}
-.panel{background:#fff;border:1px solid var(--line);border-radius:9px;padding:24px;box-shadow:0 10px 30px #1026530b}.login{max-width:470px;margin:30px auto}.panel h2{color:var(--navy);font:700 24px Georgia,serif;margin:0 0 6px}.muted{color:var(--muted)}label{display:block;font-weight:800;color:var(--navy);font-size:13px;margin:15px 0 6px}input{width:100%;padding:13px;border:1px solid #cbd5e1;border-radius:5px;background:#fff}
+.panel{background:#fff;border:1px solid var(--line);border-radius:9px;padding:24px;box-shadow:0 10px 30px #1026530b}.login{max-width:470px;margin:30px auto}.panel h2{color:var(--navy);font:700 24px Georgia,serif;margin:0 0 6px}.muted{color:var(--muted)}label{display:block;font-weight:800;color:var(--navy);font-size:13px;margin:15px 0 6px}input{width:100%;padding:13px;border:1px solid #cbd5e1;border-radius:5px;background:#fff}select,textarea{width:100%;padding:13px;border:1px solid #cbd5e1;border-radius:5px;background:#fff;font:inherit;color:var(--ink)}textarea{resize:vertical}.media-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:620px){.media-form-grid{grid-template-columns:1fr}}
 .btn{border:0;border-radius:5px;background:var(--gold);color:#1a2a48;font-weight:850;padding:12px 17px;cursor:pointer}.btn:disabled{opacity:.55;cursor:wait}.btn.secondary{background:#edf2f8;color:var(--navy);border:1px solid var(--line)}.btn.reject{background:#fff0f0;color:var(--red);border:1px solid #f1caca}.btn.small{padding:8px 12px;font-size:13px}
 .status{margin-top:14px;padding:12px 14px;border-radius:5px;background:#eef3fa;color:var(--navy);display:none;overflow-wrap:anywhere}.status.show{display:block}.status.error{background:#fff0f0;color:var(--red)}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:20px 0}.stat{background:#fff;border:1px solid var(--line);border-radius:8px;padding:17px}.stat strong{display:block;color:var(--navy);font-size:27px}.stat span{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px}
@@ -43,6 +43,29 @@ footer{padding:22px 0;color:var(--muted);font-size:12px}
 <div class="status" id="pastorPhotoStatus" role="status" aria-live="polite"></div>
 </form>
 </div>
+</section>
+<section class="panel" id="mediaUploadPanel" style="margin-bottom:20px">
+<h2>Upload sermons &amp; church media</h2>
+<p class="muted">Add a sermon video, sermon PDF or church photo directly to the public media gallery. Only signed-in church staff can use this form.</p>
+<form id="mediaUploadForm">
+<div class="media-form-grid">
+<div><label for="mediaCategory">What are you uploading?</label>
+<select id="mediaCategory" required>
+<option value="sermon-video">Sermon video</option>
+<option value="sermon-pdf">Sermon PDF / notes</option>
+<option value="church-photo">Church photo</option>
+</select></div>
+<div><label for="mediaTitle">Title</label><input id="mediaTitle" type="text" maxlength="120" required placeholder="e.g. Sunday Service — The Power of Prayer"></div>
+</div>
+<label for="mediaDescription">Short description (optional)</label>
+<textarea id="mediaDescription" rows="3" maxlength="500" placeholder="Add the preacher, date or a short description."></textarea>
+<label for="mediaFile">Choose file</label>
+<input id="mediaFile" type="file" required>
+<p class="muted" id="mediaFileHelp" style="font-size:12px;margin:7px 0">Video: MP4, WebM or MOV · Maximum 50 MB.</p>
+<button class="btn" id="mediaUploadBtn" type="submit">Upload to church media gallery</button>
+<div class="status" id="mediaUploadStatus" role="status" aria-live="polite"></div>
+</form>
+<p class="muted" style="font-size:12px;margin:12px 0 0">Uploaded items are published immediately in the public website’s media gallery. Please upload only media the church has permission to share.</p>
 </section>
 <div class="stats"><div class="stat"><strong id="pendingCount">0</strong><span>Pending review</span></div><div class="stat"><strong id="approvedCount">0</strong><span>Approved</span></div><div class="stat"><strong id="rejectedCount">0</strong><span>Rejected</span></div></div>
 <div class="toolbar"><div><h2 style="margin:0;color:var(--navy);font:700 25px Georgia">Content submissions</h2><div class="muted" style="font-size:13px">Review first. Nothing is published without staff approval.</div></div><div class="filters"><button class="filter active" data-filter="pending">Pending</button><button class="filter" data-filter="approved">Approved</button><button class="filter" data-filter="rejected">Rejected</button><button class="filter" data-filter="all">All</button></div><button class="btn secondary small" id="refreshBtn">Refresh</button></div>
@@ -102,6 +125,50 @@ $('pastorPhotoForm').addEventListener('submit',async e=>{
   $('pastorPhotoFile').value='';
  }catch(err){notice('pastorPhotoStatus','Could not upload the profile picture: '+(err.message||'Please try again.'),true);}
  finally{button.disabled=false;button.textContent='Upload profile picture';}
+});
+const mediaRules={
+ 'sermon-video':{accept:'video/mp4,video/webm,video/quicktime',types:['video/mp4','video/webm','video/quicktime'],folder:'sermons/videos',help:'Video: MP4, WebM or MOV · Maximum 50 MB.'},
+ 'sermon-pdf':{accept:'application/pdf,.pdf',types:['application/pdf'],folder:'sermons/pdfs',help:'Document: PDF only · Maximum 50 MB.'},
+ 'church-photo':{accept:'image/jpeg,image/png,image/webp',types:['image/jpeg','image/png','image/webp'],folder:'photos',help:'Photo: JPG, PNG or WebP · Maximum 50 MB.'}
+};
+function updateMediaFileRule(){
+ const rule=mediaRules[$('mediaCategory').value];
+ $('mediaFile').accept=rule.accept;
+ $('mediaFileHelp').textContent=rule.help;
+ $('mediaFile').value='';
+ $('mediaUploadStatus').className='status';
+ $('mediaUploadStatus').textContent='';
+}
+$('mediaCategory').addEventListener('change',updateMediaFileRule);
+updateMediaFileRule();
+$('mediaUploadForm').addEventListener('submit',async e=>{
+ e.preventDefault();
+ if(!user){notice('mediaUploadStatus','Please sign in with an authorised staff account first.',true);return;}
+ const category=$('mediaCategory').value,rule=mediaRules[category],file=$('mediaFile').files[0];
+ const title=$('mediaTitle').value.trim(),description=$('mediaDescription').value.trim();
+ if(!file||!title){notice('mediaUploadStatus','Enter a title and choose a file.',true);return;}
+ if(!rule.types.includes(file.type)){notice('mediaUploadStatus','That file type does not match the selected media category. Please choose the correct file.',true);return;}
+ if(file.size>50*1024*1024){notice('mediaUploadStatus','This file is larger than the current 50 MB upload limit. Please choose a smaller file.',true);return;}
+ const button=$('mediaUploadBtn');
+ button.disabled=true;button.textContent='Uploading…';
+ try{
+  const safeName=file.name.normalize('NFKD').replace(/[^a-zA-Z0-9._-]/g,'_').replace(/^\.+/,'').slice(-100)||'church-media';
+  const path=rule.folder+'/'+Date.now()+'-'+safeName;
+  const {error:uploadError}=await db.storage.from('church-media').upload(path,file,{upsert:false,contentType:file.type});
+  if(uploadError)throw uploadError;
+  const categoryLabel=category==='sermon-video'?'Sermon video':category==='sermon-pdf'?'Sermon PDF':'Church photo';
+  const fullDescription=[categoryLabel,description].filter(Boolean).join(' · ');
+  const {error:rowError}=await db.from('media_assets').insert({
+   title,description:fullDescription,storage_path:path,mime_type:file.type,is_public:true,uploaded_by:user.id
+  });
+  if(rowError)throw rowError;
+  notice('mediaUploadStatus','Upload successful. “'+title+'” is now in the public church media gallery.');
+  $('mediaUploadForm').reset();updateMediaFileRule();
+ }catch(err){
+  notice('mediaUploadStatus','Upload could not be completed: '+(err.message||'Please try again.'),true);
+ }finally{
+  button.disabled=false;button.textContent='Upload to church media gallery';
+ }
 });
 async function loadRows(){
  $('submissionList').innerHTML='<div class="empty">Loading submissions…</div>';
