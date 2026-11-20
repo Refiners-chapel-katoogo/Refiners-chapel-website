@@ -404,7 +404,7 @@ footer{background:#08172f;color:#d6dfed;padding:32px 0}.footer-inner{display:fle
         announcementsBox.appendChild(card);
        });
       }
-      const {data:media,error:mediaError}=await client.from("media_assets").select("title,description,storage_path,mime_type").eq("is_public",true).neq("title","Pastor Abby Profile").order("created_at",{ascending:false}).limit(30);
+      const {data:media,error:mediaError}=await client.from("media_assets").select("id,title,description,storage_path,mime_type").eq("is_public",true).neq("title","Pastor Abby Profile").order("created_at",{ascending:false}).limit(30);
       const filterButtons=[...document.querySelectorAll(".gallery-filter")];
       let activeFilter="all";
       const mediaType=item=>item.mime_type&&item.mime_type.startsWith("image/")?"image":item.mime_type&&item.mime_type.startsWith("video/")?"video":"document";
@@ -430,8 +430,26 @@ footer{background:#08172f;color:#d6dfed;padding:32px 0}.footer-inner{display:fle
           }else{
             const doc=document.createElement("div");doc.style.cssText="min-height:190px;display:grid;place-items:center;padding:28px 16px;background:#f3f6fb;color:#8e6c1d;font-weight:800";doc.textContent="PDF RESOURCE";figure.appendChild(doc);
           }
-          const caption=document.createElement("figcaption");caption.textContent=item.title||"Church media";
-          if(item.mime_type==="application/pdf"){const link=document.createElement("a");link.href=url;link.target="_blank";link.rel="noopener";link.textContent="Open document";caption.appendChild(document.createTextNode(" · "));caption.appendChild(link);}
+          const caption=document.createElement("figcaption");
+          const title=document.createElement("strong");title.textContent=item.title||"Church media";caption.appendChild(title);
+          if(item.description){const description=document.createElement("p");description.textContent=item.description;description.style.cssText="font-weight:400;color:#66758c;font-size:.88rem;margin:6px 0 10px";caption.appendChild(description);}
+          const actions=document.createElement("div");actions.style.cssText="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px";
+          if(mediaType(item)!=="image"){
+            const details=document.createElement("a");details.href="sermon.html?id="+encodeURIComponent(item.id);details.textContent="View details";details.style.cssText="font-size:.82rem;font-weight:800;color:#174a91";actions.appendChild(details);
+          }
+          if(item.mime_type==="application/pdf"){
+            const download=document.createElement("a");download.href=url;download.target="_blank";download.rel="noopener";download.textContent="Download PDF";download.setAttribute("download","");download.style.cssText="font-size:.82rem;font-weight:800;color:#9a7623";actions.appendChild(download);
+          }
+          const share=document.createElement("button");share.type="button";share.textContent="Share";share.style.cssText="border:1px solid #dce3ed;background:#fff;color:#344966;border-radius:5px;padding:6px 11px;font-weight:800;cursor:pointer;font-size:.8rem";
+          share.addEventListener("click",async()=>{
+            const shareUrl=new URL("sermon.html?id="+encodeURIComponent(item.id),window.location.href).href;
+            try{
+              if(navigator.share){await navigator.share({title:item.title||"Refiners Chapel media",text:item.description||"Church media from Refiners Chapel Katoogo",url:shareUrl});}
+              else if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(shareUrl);share.textContent="Link copied";}
+              else{window.prompt("Copy this media link:",shareUrl);}
+            }catch(error){if(error.name!=="AbortError")window.prompt("Copy this media link:",shareUrl);}
+          });
+          actions.appendChild(share);caption.appendChild(actions);
           figure.appendChild(caption);mediaBox.appendChild(figure);
         });
       };
