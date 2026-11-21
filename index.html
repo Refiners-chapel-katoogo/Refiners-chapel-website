@@ -130,7 +130,7 @@ footer{background:#08172f;color:#d6dfed;padding:32px 0}.footer-inner{display:fle
       </a>
       <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-nav">Menu</button>
       <nav id="main-nav" aria-label="Main navigation">
-        <a href="#welcome">Welcome</a><a href="#updates">Updates</a><a href="#about">About</a><a href="#vision">Vision &amp; Mission</a><a href="#values">Our Values</a><a href="#ministries">Ministries</a><a href="#sermons">Sermons</a><a href="#leadership">Leadership</a><a href="#visit">Visit Us</a><a href="admin.html">Media Upload Centre</a>
+        <a href="#welcome">Welcome</a><a href="#updates">Updates</a><a href="#about">About</a><a href="#vision">Vision &amp; Mission</a><a href="#values">Our Values</a><a href="#ministries">Ministries</a><a href="#sermons">Sermons</a><a href="#leadership">Leadership</a><a href="#visit">Visit Us</a><a href="staff.html">Media Upload Centre</a>
       </nav>
     </div>
   </header>
@@ -332,7 +332,7 @@ footer{background:#08172f;color:#d6dfed;padding:32px 0}.footer-inner{display:fle
       <small>© <span id="year"></span> Refiners Chapel Katoogo. All rights reserved.</small>
       <a class="back-top" href="terms.html">Terms &amp; Conditions</a>
       <a class="back-top" href="privacy.html">Privacy Policy</a>
-      <a class="back-top" href="admin.html">Media Upload Centre</a>
+      <a class="back-top" href="staff.html">Media Upload Centre</a>
       <a class="back-top" href="#home">Back to top ↑</a>
     </div>
   </footer>
@@ -417,7 +417,7 @@ footer{background:#08172f;color:#d6dfed;padding:32px 0}.footer-inner{display:fle
           const mark=document.createElement("div");mark.className="gallery-empty-mark";mark.textContent="✦";empty.appendChild(mark);
           const title=document.createElement("h4");title.textContent=media.length?"No items in this category yet":"Our gallery is being prepared";empty.appendChild(title);
           const message=document.createElement("p");message.textContent=media.length?"Choose another category to explore the church media.":"Church photos, worship moments, sermons and resources will appear here as the media team shares and publishes them.";empty.appendChild(message);
-          if(!media.length){const link=document.createElement("a");link.href="admin.html";link.textContent="Share church media";empty.appendChild(link);}
+          if(!media.length){const link=document.createElement("a");link.href="staff.html";link.textContent="Share church media";empty.appendChild(link);}
           mediaBox.appendChild(empty);return;
         }
         visible.forEach(item=>{
