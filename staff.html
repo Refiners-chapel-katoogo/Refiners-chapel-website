@@ -31,12 +31,12 @@ footer{padding:22px 0;color:var(--muted);font-size:12px}
 <form id="loginForm"><label for="email">Staff email</label><input id="email" type="email" autocomplete="username" required placeholder="Enter your staff email"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required placeholder="Enter your password"><button class="btn" id="loginBtn" type="submit" style="width:100%;margin-top:18px">Sign in securely</button></form><div class="status" id="loginStatus" role="status"></div></section>
 <section id="dashboard" hidden>
 <section class="panel" id="pastorProfilePanel" style="margin-bottom:20px">
-<h2>Refiners Chapel profile image</h2>
-<p class="muted">Upload or change the church logo or a general church photo displayed on the public church website.</p>
+<h2>Pastor Abby profile photo</h2>
+<p class="muted">Upload or change Pastor Abby’s profile photo displayed on the public church website.</p>
 <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
 <div id="pastorPhotoPreview" style="width:104px;height:104px;border-radius:50%;border:4px solid #f3e8c8;outline:1px solid var(--gold);background:linear-gradient(145deg,#102653,#1b4c8d);color:#f2d98e;display:grid;place-items:center;font:500 30px Georgia,serif;overflow:hidden">RC</div>
 <form id="pastorPhotoForm" style="flex:1;min-width:230px">
-<label for="pastorPhotoFile">Choose church logo or photo</label>
+<label for="pastorPhotoFile">Choose Pastor Abby’s profile photo</label>
 <input id="pastorPhotoFile" type="file" accept="image/jpeg,image/png,image/webp" required>
 <p class="muted" style="font-size:12px;margin:7px 0">JPG, PNG or WebP · Maximum 5 MB. The image appears publicly on the church website.</p>
 <button class="btn" id="pastorPhotoBtn" type="submit">Upload church image</button>
@@ -115,11 +115,11 @@ $('pastorPhotoForm').addEventListener('submit',async e=>{
   const path='church-profile/'+Date.now()+'-refiners-chapel.'+ext;
   const {error:uploadError}=await db.storage.from('church-media').upload(path,file,{upsert:false,contentType:file.type});
   if(uploadError)throw uploadError;
-  const {error:rowError}=await db.from('media_assets').insert({title:'Refiners Chapel Profile',description:'Official profile image for Refiners Chapel.',storage_path:path,mime_type:file.type,is_public:true,uploaded_by:user.id});
+  const {error:rowError}=await db.from('media_assets').insert({title:'Pastor Abby Profile',description:'Official profile photo for Pastor Abby.',storage_path:path,mime_type:file.type,is_public:true,uploaded_by:user.id});
   if(rowError)throw rowError;
   const publicUrl=db.storage.from('church-media').getPublicUrl(path).data.publicUrl;
   const preview=$('pastorPhotoPreview');preview.innerHTML='';const img=document.createElement('img');img.src=publicUrl;img.alt='Refiners Chapel profile image';img.style.cssText='width:100%;height:100%;object-fit:cover';preview.appendChild(img);
-  notice('pastorPhotoStatus','Refiners Chapel’s profile image has been uploaded. Refresh the public website to see it.');
+  notice('pastorPhotoStatus','Pastor Abby’s profile photo has been uploaded. Refresh the public website to see it.');
   $('pastorPhotoFile').value='';
  }catch(err){notice('pastorPhotoStatus','Could not upload the profile picture: '+(err.message||'Please try again.'),true);}
  finally{button.disabled=false;button.textContent='Upload church image';}
